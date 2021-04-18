@@ -54,10 +54,50 @@ void repository::addFile(string name){
             prev->next = temp; //puts temp into end of SLL
         }
 
+}
 
-
-
-        
-
+void repository::deleteFile(string name){
+    //create two pointers
+    singlyNode* A = CurrDLL -> head;
+    singlyNode* B = CurrDLL -> head;
+    //create a variable to check if name is found
+    bool found = false;
+    //use while loop to go through LinkedList
+    while(A -> next != NULL){
+        //if its found set found to true and break out loop
+        if(A -> fileName == name){
+            found = true;
+            break;
+        }
+        A = A -> next;
+    }
+    //if it was not found 
+    if(found == false){
+        cout << "Filename does not exist." << endl;
+        return;
+    }
+    //set A to head again
+    A = CurrDLL -> head;
+    //check if that's where the filename is found first
+    if(A -> fileName == name){
+        CurrDLL -> head = A -> next;
+        delete A;
+        return;
+    }
+    //if it was not found at head loop through linked list
+    while(A != NULL){
+        //if A next is the name
+        if(A -> next -> fileName == name){
+            //set b equal to the node after A
+            B = A -> next -> next;
+            //delete the node that the file name was found at
+            delete A -> next;
+            //set a next to b
+            A -> next = B;
+            //return out
+            return;
+        }
+        A = A -> next;
+    }
 
 }
