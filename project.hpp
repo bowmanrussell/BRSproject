@@ -21,13 +21,15 @@ class repository{
 
     private:
 
-    doublyNode* CurrDLL = new doublyNode;
+    doublyNode* DLLhead = new doublyNode;
+    doublyNode* DLLtail = new doublyNode;
 
     public:
         repository();
         //~repository();
         void addFile(string name);
         void deleteFile(string name);
-        void commit();
+        void commit(doublyNode* currNode);
+
 
 };
