@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
 #include <filesystem>
 #include "project.hpp"
-// #include <sys/stat.h>
 using namespace std;
 
 
@@ -11,17 +11,15 @@ using namespace std;
 
 int main(){
     int option;
+    vector<string> deleteVect;
     string choice;
     repository master;
+    doublyNode* currNode = new doublyNode;
+    master.addDLL(currNode);
+    
     bool check = false;
-
-
-    // while(option != 1){
-    //     cout << "type init to start new repository" << endl;
-    //     cin >> option;
-        
-    // }
     while(choice != "init"){
+        cout << "     Welcome to MiniGit" << endl;
         cout << "type 'init' to start new repository" << endl;
         cin >> choice;
         if(choice == "init"){
@@ -33,12 +31,10 @@ int main(){
                 cout << endl;
                 cout << "   Please choose a number" << endl;
                 cout << endl;
-                cout << "     Welcome to MiniGit" << endl;
-                cout << endl;
-                cout << "1. Add files to the current commit" << endl;
-                cout << "2. Delete files from the current commit" << endl;
+                cout << "1. Add file" << endl;
+                cout << "2. Delete file" << endl;
                 cout << "3. Commit changes" << endl;
-                cout << "4. View previous commits" << endl;
+                cout << "4. View previous commits (checkout)" << endl;
                 cout << "5. Quit" << endl;
                 cin >> option;
                 if(option > 5 || option < 1){
@@ -72,20 +68,30 @@ int main(){
                         string filename;
                         //repository* master;
                         cout << "Please enter the filename you want to delete" << endl;
-                        getline(cin, filename);
+                        cin >> filename;
                         master.deleteFile(filename);
                         break;
                     }
                     case 3:{
-
+                        master.commit();
+                        break;
                     }
                     case 4:{
 
                     }
                     case 5:{
-                        cout << "Thank you for using MiniGit" << endl;
-                        break;
-                        return 0;
+                        cout << "Quiting will delete your repository. Are you sure you want to procceed?  Type '1234321' to confirm deletion." << endl;
+                        cin >> option;
+                        if(option == 1234321){
+                            cout << "Thank you for using MiniGit" << endl;
+                            system("rm -r .minigit");
+                            return 0;
+
+                        }
+                        else{
+                            cout << "Repository not deleted." << endl;
+                            break;
+                        }
                     }
                     default:{
                         cout << "fatal. please enter a valid command" << endl;

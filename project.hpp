@@ -7,14 +7,15 @@ using namespace std;
 struct singlyNode{
 string fileName;
 string fileVersion; // Name of file in .minigit folder 
-singlyNode * next;
+singlyNode * next=NULL;
+int numOfSim = 0;
 };
 
 struct doublyNode{
     int commitNumber;
-    singlyNode * head;
-    doublyNode * previous;
-    doublyNode * next;
+    singlyNode * head =NULL;
+    doublyNode * previous = NULL;
+    doublyNode * next = NULL;
 };
 
 class repository{
@@ -26,10 +27,11 @@ class repository{
 
     public:
         repository();
+        void addDLL(doublyNode* toInsert);
         //~repository();
         void addFile(string name);
         void deleteFile(string name);
-        void commit(doublyNode* currNode);
+        void commit();
 
 
 };
