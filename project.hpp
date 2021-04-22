@@ -30,7 +30,7 @@ class repository{
         void addDLL(doublyNode* toInsert);
         //~repository();
         void addFile(string name);
-        void deleteFile(string name);
+        bool deleteFile(string name);
         void commit();
 
 
