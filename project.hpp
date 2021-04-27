@@ -24,14 +24,15 @@ class repository{
 
     doublyNode* DLLhead = new doublyNode;
     doublyNode* DLLtail = new doublyNode;
+    doublyNode* checkoutNode = new doublyNode;
 
     public:
         repository();
-        void addDLL(doublyNode* toInsert);
-        //~repository();
+        ~repository();
         void addFile(string name);
         bool deleteFile(string name);
         void commit();
+        void checkout();
 
 
 };

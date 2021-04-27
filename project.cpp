@@ -4,29 +4,9 @@
 #include <filesystem>
 #include <stdlib.h>
 #include "project.hpp"
+#include <copyfile.h>
 using namespace std;
 
-void repository::addDLL(doublyNode* toInsert){
-    if(DLLhead == NULL && DLLtail == NULL){ //no commit has happened yet
-        toInsert->commitNumber = 0;
-        toInsert->head = NULL;
-        toInsert->previous = NULL;
-        toInsert->next = NULL;
-        DLLhead = toInsert;
-        DLLtail = toInsert;
-
-    }
-    else{ //adds DLLnode to tail of DLL 
-
-        DLLtail->next = toInsert;
-        DLLtail->next->previous = toInsert;
-        toInsert->commitNumber = DLLtail->commitNumber++;
-        DLLtail = toInsert;
-        DLLtail->next = NULL; //when next == NULL it is the end of the LL
-
-    }
-
-}
 
 repository::repository(){ //constructor
     DLLhead->commitNumber = 0;
@@ -34,14 +14,44 @@ repository::repository(){ //constructor
     DLLhead->previous = NULL;
     DLLhead->next = NULL;
 
+
     DLLtail->commitNumber = 0;
     DLLtail->head = NULL;
     DLLtail->previous = NULL;
     DLLtail->next = NULL;
+    checkoutNode = DLLtail;
+}
+repository::~repository(){
+    doublyNode* temp = DLLtail;
+    doublyNode* prevDLL = DLLtail;
+    singlyNode* curr;
+    singlyNode* prev;
+    curr = temp->head;
+    prev = temp->head;
+    while(temp!=NULL){
+        while(curr!=NULL){
+            
+            prev = curr;
+            curr = curr->next;
+            delete prev;
+        }
+        prevDLL = temp;
+        temp = temp->previous;  
+        delete prevDLL;
+    }
+    temp = checkoutNode;
+    delete temp;
+    DLLtail = NULL;
+    DLLhead = NULL;
+    checkoutNode = NULL;
 }
 
 void repository::addFile(string name) // namespace name
 {
+    if(checkoutNode != DLLtail){
+        cout << "return to most current commit to add" << endl;
+        return;
+    }
 
     string line;
     string fileType;
@@ -89,6 +99,12 @@ void repository::addFile(string name) // namespace name
 
 
 bool repository::deleteFile(string name){
+
+    if(checkoutNode != DLLtail){
+        cout << "return to most current commit to delete" << endl;
+        return false;
+    }
+    
     //create two singly nodes and have them point to the head
     singlyNode* curr = DLLtail -> head;
     singlyNode* prev = DLLtail -> head;
@@ -132,6 +148,12 @@ bool repository::deleteFile(string name){
 
 
 void repository::commit(){
+
+    if(checkoutNode != DLLtail){
+        cout << "return to most current commit to commit again" << endl;
+        return;
+    }
+
     if(DLLtail->head ==NULL){
         cout << "try adding files before commiting" << endl;
         return;
@@ -147,7 +169,6 @@ void repository::commit(){
         while(temp!=NULL){
             string tmp = "./.minigit/" + temp->fileVersion;
             file.open(tmp.c_str());
-            cout << tmp << endl;
             if(file.fail()){//add files to .minigit if its not in there already
                 cout << "fails" << endl;
                 copyLine = "cp " + temp->fileName + " ./.minigit/" + temp->fileVersion;
@@ -173,30 +194,18 @@ void repository::commit(){
                 }
                 file.close();
                 tempString = "";
-                cout << commitFile << "    " << miniGitFile << endl;
                 if(commitFile == miniGitFile){ //if the files are the same do not do anyhting
                     //not finding equal files
-                    cout << "equal files" << endl;
                 }
                 else{
                     temp->numOfSim++; //  increments number of similar files 
                     temp->fileVersion = temp->fileName + "_" + to_string(temp->numOfSim); //updates SLL node fileVersion
-                    cout << temp->fileVersion  << endl;
                     copyLine = "cp " + temp->fileName + " ./.minigit/" + temp->fileVersion;
                     system(copyLine.c_str()); //copies file into minigit directory
 
                         //add converted file into .minigit with incremented version number
                         //increment file's verion number in SLLnode
                 }
-                doublyNode* addNode = new doublyNode;
-                //creates new DLL node, establishes connection with tail and updates tail using add
-                addNode = DLLtail;
-                addNode->commitNumber = DLLtail->commitNumber++;
-                addDLL(addNode);
-                //create new DLLnode
-                //add DLLnode into DLL (new DLL = oldDLL->next)
-                //set new DLL->head = old DLLhead
-
                 miniGitFile = "";
                 commitFile = "";
 
@@ -205,6 +214,76 @@ void repository::commit(){
             // need to check if file exists, if so change bool to true and break
             // also if it exists, need to compare version in minigit w/ new version  
         }    
+            //creates new DLL node, establishes connection with tail and updates tail using add
+            if(DLLhead->next == NULL && DLLtail->previous == NULL){ 
+                DLLhead = DLLtail;
+                DLLtail->commitNumber = 1;
+                DLLtail->previous = DLLhead;
+                DLLhead->next = DLLtail;
+                checkoutNode = DLLtail;
+
+            }
+            else{
+                doublyNode* addNode = new doublyNode;
+
+                addNode->head = DLLtail->head;
+                addNode->previous = DLLtail;
+                addNode->next = NULL;
+                DLLtail->next = addNode;
+                addNode->commitNumber = DLLtail->commitNumber + 1;
+                DLLtail = addNode;
+                checkoutNode = DLLtail;
+            }
+            //create new DLLnode
+            //add DLLnode into DLL (new DLL = oldDLL->next)
+            //set new DLL->head = old DLLhead
+}
+
+void repository::checkout(){
+    bool keepGoing = true;
+    string commit = "";
+    int comNum;
+    string copyline;
+    while(keepGoing == true){
+
+        cout << "Enter commit number: " << endl;
+        cin >> commit;
+        if(!isdigit(commit[0])){
+            //do nothing
+        }
+        else{
+            comNum = stoi(commit);
+        }
+        if(comNum > -1 && comNum <= DLLtail->commitNumber){
+
+            keepGoing = false;
+        }
+        else{
+            cout << "Enter valid commit number." << endl;
+        }
+        cout << DLLtail->commitNumber << endl;
+        commit = "";
+    }
+    doublyNode* temp = DLLtail;
+    while(temp!=NULL&&temp->commitNumber != comNum){
+
+        temp = temp->previous;
+    }
+        checkoutNode = temp;
+        singlyNode* headofSLL = temp->head;
+        ifstream file;
+    while(headofSLL != NULL){
+        //find file from nodes version number
+        string tmp = "./.minigit/" + headofSLL->fileVersion;
+        file.open(tmp.c_str());
+        copyline = "cp ./.minigit/" + headofSLL->fileVersion + " " + headofSLL->fileName;
+        if(!file.fail()){
+            deleteFile(headofSLL->fileName);
+            system(copyline.c_str());
+
+        }
+        headofSLL = headofSLL->next;
+    }
 }
 
 

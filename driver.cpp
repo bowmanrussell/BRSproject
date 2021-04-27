@@ -100,41 +100,6 @@ int main(){
                             master.deleteFile(filename);
                         }
 
-
-                        // bool successful = false;
-                        // string filename;
-                        // string choice;
-                        // //repository* master;
-                        // while(!successful){
-                        //     cout << "|--------------------------------------|" << endl;
-                        //     cout << "| Type quit to return to the main menu |" << endl;
-                        //     cout << "|                                      |" << endl;
-                        //     cout << "| Or hit any button to continue        |" << endl;
-                        //     cout << "|                                      |" << endl;
-                        //     cout << "|--------------------------------------|" << endl;
-                        //     cout << "You have entered: ";
-                        //     cin >> choice;
-                        //     if(choice == "quit" || choice == "Quit" || choice == "QUIT"){
-                        //         break;
-                        //     }
-                        //     else{
-                        //         cout << "Please enter the filename you want to delete" << endl;
-                        //         cout << "File name: ";
-                        //         cin.ignore();
-                        //         getline(cin, filename);
-                        //         cout << endl;
-                        //         cout << "attempting to delete: " << filename << endl;
-                        //         //master.deleteFile(filename);
-                        //         if(!master.deleteFile(filename)){
-                        //             //empty if statement so it stops running if it doesn not exist
-                        //             break;
-                        //         }
-                        //         if(master.deleteFile(filename) == true){
-                        //             successful = true;
-                        //             break;
-                        //         }
-                        //     }
-                        // }
                         break;
 
                     }
@@ -143,6 +108,8 @@ int main(){
                         break;
                     }
                     case 4:{
+                        master.checkout();
+                        break;
 
                     }
                     case 5:{
