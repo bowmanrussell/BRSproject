@@ -21,29 +21,25 @@ repository::repository(){ //constructor
     DLLtail->next = NULL;
     checkoutNode = DLLtail;
 }
-repository::~repository(){
-    doublyNode* temp = DLLtail;
-    doublyNode* prevDLL = DLLtail;
+repository::~repository(){ //destructs DLLs and SSLs
+
+    doublyNode* currNode = DLLtail;
+    doublyNode* tempNode;
     singlyNode* curr;
-    singlyNode* prev;
-    curr = temp->head;
-    prev = temp->head;
-    while(temp!=NULL){
+    singlyNode* temp;
+
+    while(currNode!=NULL){
+        curr = currNode->head;
         while(curr!=NULL){
-            
-            prev = curr;
-            curr = curr->next;
-            delete prev;
+            temp = curr->next;
+            delete curr;
+            curr = temp;
+
         }
-        prevDLL = temp;
-        temp = temp->previous;  
-        delete prevDLL;
+        tempNode = currNode->next;
+        delete currNode;
+        currNode = tempNode;
     }
-    temp = checkoutNode;
-    delete temp;
-    DLLtail = NULL;
-    DLLhead = NULL;
-    checkoutNode = NULL;
 }
 
 void repository::addFile(string name) // namespace name
@@ -170,7 +166,7 @@ void repository::commit(){
             string tmp = "./.minigit/" + temp->fileVersion;
             file.open(tmp.c_str());
             if(file.fail()){//add files to .minigit if its not in there already
-                cout << "fails" << endl;
+                cout << "file has been added" << endl;
                 copyLine = "cp " + temp->fileName + " ./.minigit/" + temp->fileVersion;
                 system(copyLine.c_str()); //copies file into minigit directory 
 
@@ -210,12 +206,12 @@ void repository::commit(){
                 commitFile = "";
 
             }      
-            temp = temp->next;
-            // need to check if file exists, if so change bool to true and break
-            // also if it exists, need to compare version in minigit w/ new version  
+            temp = temp->next; //increment SLL node
+
         }    
-            //creates new DLL node, establishes connection with tail and updates tail using add
-            if(DLLhead->next == NULL && DLLtail->previous == NULL){ 
+           
+            if(DLLhead->next == NULL && DLLtail->previous == NULL){  //adds first DLL with head = tail
+
                 DLLhead = DLLtail;
                 DLLtail->commitNumber = 1;
                 DLLtail->previous = DLLhead;
@@ -224,7 +220,7 @@ void repository::commit(){
 
             }
             else{
-                doublyNode* addNode = new doublyNode;
+                doublyNode* addNode = new doublyNode; //ads new DLL at tail
 
                 addNode->head = DLLtail->head;
                 addNode->previous = DLLtail;
@@ -234,56 +230,85 @@ void repository::commit(){
                 DLLtail = addNode;
                 checkoutNode = DLLtail;
             }
-            //create new DLLnode
-            //add DLLnode into DLL (new DLL = oldDLL->next)
-            //set new DLL->head = old DLLhead
+}
+
+
+void copy(string miniFile, string currFile){
+    string line;
+    //For writing text file
+    //Creating ofstream & ifstream class object
+    ifstream fromMini;
+    fromMini.open(miniFile.c_str());
+    //ofstream toMini {currFile};
+ 
+    
+    ofstream toMini(currFile, ofstream::trunc); //clearns current file
+    if(toMini && fromMini){ //if they both open
+ 
+        while(getline(fromMini,line)){ //writes .minigit file to current file
+            toMini << line << endl;
+        }
+        
+        
+ 
+        cout << "Copy Finished" << endl;
+ 
+    } else {
+        //Something went wrong
+        cout << "Couldn't copy" << endl;
+    }
+ 
+    //Closing file
+    fromMini.close();
+    toMini.close();
+ 
+    return;
 }
 
 void repository::checkout(){
     bool keepGoing = true;
     string commit = "";
-    int comNum;
+    int comNum = -1;
     string copyline;
-    while(keepGoing == true){
+    while(keepGoing == true){  
 
         cout << "Enter commit number: " << endl;
         cin >> commit;
-        if(!isdigit(commit[0])){
-            //do nothing
+        if(!isdigit(commit[0])){ //checks weather input is digit
+         //do nothing
         }
         else{
-            comNum = stoi(commit);
+            comNum = stoi(commit); //convert to int if it is a number
         }
-        if(comNum > -1 && comNum <= DLLtail->commitNumber){
+        if(comNum > -1 && comNum <= DLLtail->commitNumber){ //check if its a valid commit number
 
             keepGoing = false;
         }
         else{
-            cout << "Enter valid commit number." << endl;
+            cout << "Enter valid commit number." << endl; 
         }
-        cout << DLLtail->commitNumber << endl;
+
         commit = "";
     }
-    doublyNode* temp = DLLtail;
-    while(temp!=NULL&&temp->commitNumber != comNum){
+        doublyNode* temp = DLLtail;
+    while(temp!=NULL&&temp->commitNumber != comNum){ //finds DLL node with proper commit number
 
         temp = temp->previous;
     }
-        checkoutNode = temp;
-        singlyNode* headofSLL = temp->head;
+        checkoutNode = temp;//sets checkout node to garuntee add/delete/commit dont work
+        singlyNode* headofSLL = temp->head; //sets a head of SLL node
         ifstream file;
-    while(headofSLL != NULL){
-        //find file from nodes version number
-        string tmp = "./.minigit/" + headofSLL->fileVersion;
-        file.open(tmp.c_str());
-        copyline = "cp ./.minigit/" + headofSLL->fileVersion + " " + headofSLL->fileName;
-        if(!file.fail()){
-            deleteFile(headofSLL->fileName);
-            system(copyline.c_str());
 
+
+         while(headofSLL != NULL){ //for each signly node 
+            string tmp = "./.minigit/" + headofSLL->fileVersion;
+            string currFile = headofSLL->fileName;
+            copy(tmp, currFile);
+            headofSLL = headofSLL->next;
         }
-        headofSLL = headofSLL->next;
-    }
+
+
+
 }
 
 
